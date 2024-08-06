@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  photo     Bytes?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reservations Reservation[]
+}
+
+enum CuisineType {
+  ITALIAN
+  FRENCH
+  JAPANESE
+  CHINESE
+  INDIAN
+  MEXICAN
+  BURGER
+  PIZZA
+}
+
+model Restaurant {
+  id            Int           @id @default(autoincrement())
+  name          String
+  location      String
+  description   String
+  cuisineType   CuisineType
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  tables        Table[]
+  reservations  Reservation[] // Campo para a relação com reservas
+}
+
+model Table {
+  id            Int           @id @default(autoincrement())
+  number        Int
+  capacity      Int
+  restaurantId  Int
+  restaurant    Restaurant    @relation(fields: [restaurantId], references: [id])
+  reservations  Reservation[] // Campo para a relação com reservas
+}
+
+model Reservation {
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  restaurantId   Int
+  tableId         Int
+  reservationTime DateTime
+  numberOfPeople  Int
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user        User      @relation(fields: [userId], references: [id])
+  restaurant  Restaurant @relation(fields: [restaurantId], references: [id])
+  table       Table     @relation(fields: [tableId], references: [id])
+}
