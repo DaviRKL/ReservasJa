@@ -1,26 +1,72 @@
 import { Injectable } from '@nestjs/common';
 import { CreateRestaurantDto } from './dto/create-restaurant.dto';
 import { UpdateRestaurantDto } from './dto/update-restaurant.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class RestaurantsService {
-  create(createRestaurantDto: CreateRestaurantDto) {
-    return 'This action adds a new restaurant';
+  constructor(private prisma: PrismaService, private jwtService: JwtService) {}
+
+  async create(createRestaurantDto: CreateRestaurantDto) {
+    try {
+      const restaurant = await this.prisma.restaurant.create({
+        data: {
+          ...createRestaurantDto,
+        },
+      });
+      return restaurant;
+    } catch (error) {
+      throw new Error(`Erro ao criar restaurante: ${error.message}`);
+    }
   }
 
-  findAll() {
-    return `This action returns all restaurants`;
+  async findAll() {
+    try {
+      const restaurants = await this.prisma.restaurant.findMany();
+      return restaurants
+    } catch (error) {
+      throw new Error(`Erro ao buscar restaurantes: ${error.message}`);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} restaurant`;
+  async findOne(id: number) {
+    try {
+      const restaurant = await this.prisma.restaurant.findFirst({
+        where: { id },
+      });
+      if (!restaurant) {
+        throw new Error('Transação não encontrada');
+      }
+      return restaurant;
+    } catch (error) {
+      throw new Error(`Erro ao buscar transação: ${error.message}`);
+    }
   }
 
-  update(id: number, updateRestaurantDto: UpdateRestaurantDto) {
-    return `This action updates a #${id} restaurant`;
+  async update(id: number, updateRestaurantDto: UpdateRestaurantDto) {
+    try {
+      const restaurant = await this.prisma.restaurant.update({
+        where: { id },
+        data: updateRestaurantDto,
+      });
+      return restaurant;
+    } catch (error) {
+      throw new Error(`Erro ao atualizar transação: ${error.message}`);
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} restaurant`;
+  async remove(id: number) {
+    try {
+      const restaurant = await this.prisma.restaurant.deleteMany({
+        where: { id },
+      });
+      if (!restaurant.count) {
+        throw new Error('Transação não encontrada ou usuário não autorizado');
+      }
+      return { message: 'Transação removida com sucesso' };
+    } catch (error) {
+      throw new Error(`Erro ao remover transação: ${error.message}`);
+    }
   }
 }
