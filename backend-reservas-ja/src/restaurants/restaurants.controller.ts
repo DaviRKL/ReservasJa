@@ -21,7 +21,7 @@ export class RestaurantsController {
   }
 
   @Get()
-  async findAll(@Req() req: Request, @Res() res: Response) {
+  async findAll(@Req() req: Request) {
     try {
       const restaurants = await this.restaurantsService.findAll();
       return { statusCode: HttpStatus.OK, data: restaurants };
@@ -42,7 +42,7 @@ export class RestaurantsController {
   
   @UseGuards(AuthGuard)
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateRestaurantDto: UpdateRestaurantDto, @Res() res: Response) {
+  async update(@Param('id') id: string, @Body() updateRestaurantDto: UpdateRestaurantDto) {
     try {
       const restaurant = await this.restaurantsService.update(+id, updateRestaurantDto);
       return { statusCode: HttpStatus.OK, data: restaurant};
@@ -54,12 +54,12 @@ export class RestaurantsController {
 
   @UseGuards(AuthGuard)
   @Delete(':id')
-  async remove(@Param('id') id: string, @Res() res: Response) {
+  async remove(@Param('id') id: string) {
     try {
       await  this.restaurantsService.remove(+id);
-      return res.status(HttpStatus.NO_CONTENT).send();
+      return { statusCode: HttpStatus.NO_CONTENT};
     } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: 'Erro ao deletar transação' });
+      return { statusCode: HttpStatus.BAD_REQUEST};
     }
   }
 }
