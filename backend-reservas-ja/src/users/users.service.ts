@@ -10,7 +10,7 @@ export class UsersService {
   constructor(private prisma: PrismaService, private jwtService: JwtService) {}
 
   async create(CreateUserDto: CreateUserDto) {
-    const { name, email, password, photo } = CreateUserDto;
+    const { name, email, password, photo, role } = CreateUserDto;
     const hashedPassword = await bcrypt.hash(password, 10);
 
     try {
@@ -20,6 +20,7 @@ export class UsersService {
           email,
           password: hashedPassword,
           photo: Buffer.from(photo, 'base64'),
+          role: role || 'USER'
         },
       });
       return user;
@@ -36,7 +37,7 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    const { name, email, password, photo } = updateUserDto;
+    const { name, email, password, photo, role } = updateUserDto;
     const updatedData: any = {};
 
     if (name) updatedData.name = name;
@@ -56,6 +57,7 @@ export class UsersService {
       }
     }
     if (photo) updatedData.photo = Buffer.from(photo, 'base64');
+    if (role) updatedData.role = role;
 
     try {
       const user = await this.prisma.user.update({
@@ -100,7 +102,7 @@ export class UsersService {
           HttpStatus.UNAUTHORIZED,
         );
       }
-      const token = this.jwtService.sign({ userId: user.id });
+      const token = this.jwtService.sign({ userId: user.id, userRole: user.role });
 
       return { token };
     } catch (error) {
@@ -124,6 +126,7 @@ export class UsersService {
           name: true,
           email: true,
           photo: true,
+          role: true,
           createdAt: true,
           updatedAt: true,
         },

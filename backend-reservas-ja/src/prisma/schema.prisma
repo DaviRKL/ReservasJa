@@ -7,16 +7,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  USER
+  OWNER
+  EMPLOYEE
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   name      String
   email     String   @unique
   password  String
   photo     Bytes?
+  role      UserRole @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   reservations Reservation[]
+  ownedRestaurants Restaurant[] @relation("OwnerRestaurants")
+  employments Employment[]
 }
 
 enum CuisineType {
@@ -36,10 +45,13 @@ model Restaurant {
   location      String
   description   String
   cuisineType   CuisineType
+  ownerId       Int
+  owner         User          @relation("OwnerRestaurants", fields: [ownerId], references: [id])
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
   tables        Table[]
-  reservations  Reservation[] // Campo para a relação com reservas
+  reservations  Reservation[] @relation("RestaurantReservations")
+  employees     Employment[]
 }
 
 model Table {
@@ -48,13 +60,13 @@ model Table {
   capacity      Int
   restaurantId  Int
   restaurant    Restaurant    @relation(fields: [restaurantId], references: [id])
-  reservations  Reservation[] // Campo para a relação com reservas
+  reservations  Reservation[]
 }
 
 model Reservation {
   id              Int      @id @default(autoincrement())
   userId          Int
-  restaurantId   Int
+  restaurantId    Int
   tableId         Int
   reservationTime DateTime
   numberOfPeople  Int
@@ -62,6 +74,17 @@ model Reservation {
   updatedAt       DateTime @updatedAt
 
   user        User      @relation(fields: [userId], references: [id])
-  restaurant  Restaurant @relation(fields: [restaurantId], references: [id])
+  restaurant  Restaurant @relation("RestaurantReservations", fields: [restaurantId], references: [id])
   table       Table     @relation(fields: [tableId], references: [id])
+}
+
+model Employment {
+  id            Int         @id @default(autoincrement())
+  userId        Int
+  restaurantId  Int
+  role          UserRole    @default(EMPLOYEE)
+  user          User        @relation(fields: [userId], references: [id])
+  restaurant    Restaurant  @relation(fields: [restaurantId], references: [id])
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 }

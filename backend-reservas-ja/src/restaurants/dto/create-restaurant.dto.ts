@@ -17,4 +17,7 @@ export class CreateRestaurantDto {
     @IsNotEmpty()
     @IsEnum(CuisineType)
     cuisineType: CuisineType;
+
+    @IsNotEmpty()
+    ownerId: number;
 }
