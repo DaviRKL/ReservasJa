@@ -14,7 +14,6 @@ export class CreateUserDto {
     password: string;
 
     @IsOptional()
-    @IsBase64()
     photo?: string;
 
     @IsOptional()
