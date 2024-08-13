@@ -7,19 +7,26 @@ import {
   Get,
   UseGuards,
   Req,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from '../auth/auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post('register')
-  async register(@Body() createUserDto: CreateUserDto){
-      return this.usersService.create(createUserDto);
+  @UseInterceptors(FileInterceptor('photo'))
+  async register(@Body() createUserDto: CreateUserDto, @UploadedFile() file: Express.Multer.File){
+    return this.usersService.create({
+        ...createUserDto,
+        photo: file.buffer.toString('base64'),
+      });
   }
 
   @Post('login')
