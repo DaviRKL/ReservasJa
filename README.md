@@ -46,7 +46,7 @@ __2.1 Configurar Variáveis de Ambiente__
 
 No diretório backend-reservas-ja, crie um arquivo .env com as seguintes variáveis:
 ```bash
-DATABASE_URL="postgresql://usuario:senha@localhost:5432/reservasja?schema=public"
+DATABASE_URL="mysql://usuario:senha@localhost:5432/reservasja?schema=public"
 
 JWT_SECRET="seu_segredo_jwt"
 ```
