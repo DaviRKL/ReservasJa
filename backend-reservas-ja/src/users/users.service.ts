@@ -12,14 +12,14 @@ export class UsersService {
   async create(CreateUserDto: CreateUserDto) {
     const { name, email, password, photo, role } = CreateUserDto;
     const hashedPassword = await bcrypt.hash(password, 10);
-
+    
     try {
       const user = await this.prisma.user.create({
         data: {
           name,
           email,
           password: hashedPassword,
-          photo: Buffer.from(photo, 'base64'),
+          photo: photo ? Buffer.from(photo, 'base64'): undefined,
           role: role || 'USER'
         },
       });

@@ -23,9 +23,11 @@ export class UserController {
   @Post('register')
   @UseInterceptors(FileInterceptor('photo'))
   async register(@Body() createUserDto: CreateUserDto, @UploadedFile() file: Express.Multer.File){
+    const photo = file ? file.buffer.toString('base64') : undefined;
+    
     return this.usersService.create({
         ...createUserDto,
-        photo: file.buffer.toString('base64'),
+        photo,
       });
   }
 
